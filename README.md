@@ -85,3 +85,5 @@ KERNEL=="ttyUSB*", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", ATTRS{seri
 
 - reboot_sensor_cmd: 센서 재시작(c=99)
 
+- euler_angle_north_init_cmd : Euler angle 자북 방향으로 초기화
+

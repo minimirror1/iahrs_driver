@@ -284,44 +284,24 @@ bool Euler_Angle_North_Init_Command(iahrs_driver::euler_angle_north_init::Reques
 {
 	bool bResult = false;
 
-    double dSend_Data[10];
-	
+    double dSend_Data[10];	
 	ROS_INFO("Starting North initialization process...");
 	
+	SendRecv("fd\n", dSend_Data, 10);
 	// Enable magnetic calibration mode
-	SendRecv("mv=1\n", dSend_Data, 10);
-	ROS_INFO("Magnetic calibration mode enabled. Starting calibration...");
-
-	// Wait for 1 second
-	usleep(1000000);
-	ROS_INFO("Calibration in progress... 1 second passed");
-	
-	// Wait for 1 second
-	usleep(1000000);
-	ROS_INFO("Calibration in progress... 2 seconds passed");
-	
-	// Wait for 1 second
-	usleep(1000000);
-	ROS_INFO("Calibration in progress... 3 seconds passed");
-	
-	// Wait for 1 second
-	usleep(1000000);
-	ROS_INFO("Calibration in progress... 4 seconds passed");
-	
-	// Wait for 1 second
-	usleep(1000000);
-	ROS_INFO("Calibration complete. 5 seconds passed. Resetting angles...");
-	
+	SendRecv("o=1\n", dSend_Data, 10);
+	SendRecv("mv=10\n", dSend_Data, 10);
 	// Reset angle
-	SendRecv("ra\n", dSend_Data, 10);
-	ROS_INFO("Angles have been reset. X-axis now points North.");
+	SendRecv("mv\n", dSend_Data, 10);
+	ROS_INFO("read mv = %f", dSend_Data[0]);
 
-    usleep(1000000); // 1 second wait
-	ROS_INFO("Finalizing calibration...");
-	
-	// Disable magnetic calibration mode
+	SendRecv("ra\n", dSend_Data, 10);
+
+
+	usleep(3000000);//1 second wait
+	SendRecv("o=0\n", dSend_Data, 10);
 	SendRecv("mv=0\n", dSend_Data, 10);
-	ROS_INFO("Magnetic calibration mode disabled. North initialization complete!");
+
 
     bResult = true;
 	res.command_Result = bResult;

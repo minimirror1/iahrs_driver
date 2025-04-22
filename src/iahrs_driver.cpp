@@ -13,6 +13,7 @@
 #include "iahrs_driver/euler_angle_reset.h"
 #include "iahrs_driver/pose_velocity_reset.h"
 #include "iahrs_driver/reboot_sensor.h"
+#include "iahrs_driver/euler_angle_north_init.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -75,6 +76,8 @@ ros::ServiceServer pose_velocity_reset_service;
 iahrs_driver::pose_velocity_reset pose_velocity_reset_cmd;
 ros::ServiceServer reboot_sensor_service;
 iahrs_driver::reboot_sensor reboot_sensor_cmd;
+ros::ServiceServer euler_angle_north_init_service;
+iahrs_driver::euler_angle_north_init euler_angle_north_init_cmd;
 
 int serial_open ()
 {
@@ -276,6 +279,54 @@ bool Reboot_Sensor_Command(iahrs_driver::reboot_sensor::Request  &req,
 	return true;
 }
 
+bool Euler_Angle_North_Init_Command(iahrs_driver::euler_angle_north_init::Request  &req, 
+					       iahrs_driver::euler_angle_north_init::Response &res)
+{
+	bool bResult = false;
+
+    double dSend_Data[10];
+	
+	ROS_INFO("Starting North initialization process...");
+	
+	// Enable magnetic calibration mode
+	SendRecv("mv=1\n", dSend_Data, 10);
+	ROS_INFO("Magnetic calibration mode enabled. Starting calibration...");
+
+	// Wait for 1 second
+	usleep(1000000);
+	ROS_INFO("Calibration in progress... 1 second passed");
+	
+	// Wait for 1 second
+	usleep(1000000);
+	ROS_INFO("Calibration in progress... 2 seconds passed");
+	
+	// Wait for 1 second
+	usleep(1000000);
+	ROS_INFO("Calibration in progress... 3 seconds passed");
+	
+	// Wait for 1 second
+	usleep(1000000);
+	ROS_INFO("Calibration in progress... 4 seconds passed");
+	
+	// Wait for 1 second
+	usleep(1000000);
+	ROS_INFO("Calibration complete. 5 seconds passed. Resetting angles...");
+	
+	// Reset angle
+	SendRecv("ra\n", dSend_Data, 10);
+	ROS_INFO("Angles have been reset. X-axis now points North.");
+
+    usleep(1000000); // 1 second wait
+	ROS_INFO("Finalizing calibration...");
+	
+	// Disable magnetic calibration mode
+	SendRecv("mv=0\n", dSend_Data, 10);
+	ROS_INFO("Magnetic calibration mode disabled. North initialization complete!");
+
+    bResult = true;
+	res.command_Result = bResult;
+	return true;
+}
 
 int main (int argc, char** argv)
 {
@@ -314,6 +365,7 @@ int main (int argc, char** argv)
 	euler_angle_reset_service = sh.advertiseService("euler_angle_reset_cmd", Euler_Angle_Reset_Command);
 	pose_velocity_reset_service = sh.advertiseService("pose_velocity_reset_cmd", Pose_Velocity_Reset_Command);
 	reboot_sensor_service = sh.advertiseService("reboot_sensor_cmd", Reboot_Sensor_Command);
+	euler_angle_north_init_service = sh.advertiseService("euler_angle_north_init_cmd", Euler_Angle_North_Init_Command);
 	
 	nh.getParam("m_bSingle_TF_option", m_bSingle_TF_option);
     	printf("##m_bSingle_TF_option: %d \n", m_bSingle_TF_option);

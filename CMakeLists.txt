@@ -21,6 +21,7 @@ add_service_files(
   euler_angle_reset.srv
   pose_velocity_reset.srv
   reboot_sensor.srv
+  euler_angle_north_init.srv
 )
 
 generate_messages(   
